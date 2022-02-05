@@ -17,7 +17,7 @@ export class MainComponent implements OnInit {
 
   constructor(private todoService: TodosService) {
     this.isAllTodosChecked$ =  this.todoService.todos$.pipe(
-      map((todos => todos.every(todo => todo.isCompleted)))
+      map((todos => todos.every(todo => todo.isComplete)))
     );
     this.noTodoClass$ = this.todoService.todos$.pipe(
       map((todos) => todos.length ===0)
@@ -25,10 +25,10 @@ export class MainComponent implements OnInit {
     this.visibleTodos$ = combineLatest([this.todoService.todos$, this.todoService.filter$]).pipe(map(([todos, filter]: [TodoInterface[], FilterEnum])=>{
       if(filter === FilterEnum.active)
       {
-        return todos.filter(todo => !todo.isCompleted);
+        return todos.filter(todo => !todo.isComplete);
       } else if(filter === FilterEnum.completed)
       {
-        return todos.filter(todo => todo.isCompleted);
+        return todos.filter(todo => todo.isComplete);
       }
       return todos;
 
@@ -43,6 +43,7 @@ export class MainComponent implements OnInit {
    }
 
   ngOnInit(): void {
+    this.todoService.getTodos();
   }
 
 }

@@ -16,7 +16,7 @@ export class TodoComponent implements OnInit, OnChanges {
   constructor(private todoService : TodosService) { }
 
   ngOnInit(): void {
-    this.editingText = this.todoProps.text;
+    this.editingText = this.todoProps.task;
   }
   ngOnChanges(changes:SimpleChanges): void {
     if(changes.isEditingProps.currentValue)

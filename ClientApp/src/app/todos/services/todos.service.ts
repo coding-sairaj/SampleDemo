@@ -6,8 +6,7 @@ import { TodoInterface } from "src/app/todos/types/todo.interface";
 
 const httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type':  'application/json',
-      Authorization: 'my-auth-token'
+      'Content-Type':  'application/json'
     })
   };
 @Injectable()
@@ -17,31 +16,44 @@ export class TodosService
     private readonly _baseUrl:string;
     constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
         this._http = http;
-        this._baseUrl = baseUrl + 'weatherforecast';
+        this._baseUrl = baseUrl + 'weatherforecast/';
       }
     todos$ = new BehaviorSubject<TodoInterface[]>([]);
     filter$ = new BehaviorSubject<FilterEnum>(FilterEnum.all);
 
-    
+    getTodos(): void {
+        this._http.get<TodoInterface[]>(this._baseUrl).subscribe(result => {
+            //this.todos$.next(result);
+            const tasks: TodoInterface[] = result.map(task=> {
+                return <TodoInterface>{
+                    id: task.id,
+                    isComplete: task.isComplete,
+                    task: task.task
+                }
+            });
+            this.todos$.next(tasks);
+        });
+    }
 
     addTodo(text: string): void {
-        this._http.post<string>(this._baseUrl,text).subscribe(result => {
-            
+        this._http.post<TodoInterface>(this._baseUrl,{"task":text},httpOptions).subscribe(result => {
+            const newTodo: TodoInterface = {
+                id: result.id,
+                isComplete: result.isComplete,
+                task: result.task
+            };
+            const updateTodos = [...this.todos$.getValue(), newTodo];
+            this.todos$.next(updateTodos);
           });
-        const newTodo: TodoInterface = {
-            text,
-            isCompleted: false,
-            id: Math.random().toString(16)
-        };
-        const updateTodos = [...this.todos$.getValue(), newTodo];
-        this.todos$.next(updateTodos);
     }
-    toggleAll(isCompleted:boolean) : void {
+    toggleAll(isComplete:boolean) : void {
         const updateTodos = this.todos$.getValue().map(todo => {
-            return {
+            const task : TodoInterface = {
                 ...todo,
-                isCompleted
-            }
+                isComplete
+            };
+            this._http.put(this._baseUrl + task.id, task).subscribe();
+            return task;
         });
         this.todos$.next(updateTodos);
     }
@@ -51,16 +63,19 @@ export class TodosService
     changeTodo(id:string, text: string) : void {
         const updateTodos = this.todos$.getValue().map(todo => {
             if(todo.id === id) {
-                return {
+                const task : TodoInterface = {
                     ...todo,
-                    text,
+                    task: text
                 };
+                this._http.put(this._baseUrl + id, task).subscribe();
+                return task;
             }
             return todo;
         });
         this.todos$.next(updateTodos);
     }
     removeTodo(id:string) : void{
+        this._http.delete(this._baseUrl + id).subscribe();
         const updateTodos = this.todos$.getValue().filter((todo)=>todo.id !== id);
         this.todos$.next(updateTodos);
     }
@@ -68,10 +83,12 @@ export class TodosService
         const updateTodos = this.todos$.getValue().map(todo => {
             if(todo.id === id)
             {
-                return {
+                const task : TodoInterface= {
                     ...todo,
-                    isCompleted: !todo.isCompleted
+                    isComplete: !todo.isComplete
                 };
+                this._http.put(this._baseUrl + id, task).subscribe();
+                return task;
             }
             return todo;
         });

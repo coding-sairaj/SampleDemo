@@ -256,9 +256,12 @@ body {
 .todo-list li.editing:last-child {
 	margin-bottom: -1px;
 }
-
+.istaskcomplete {
+	text-decoration: line-through;
+}
 .footer {
 	padding: 10px 15px;
+	box-sizing: content-box;
 	height: 20px;
 	text-align: center;
 	font-size: 15px;
@@ -267,6 +270,7 @@ body {
 
 .footer:before {
 	content: '';
+	box-sizing: content-box;
 	position: absolute;
 	right: 0;
 	bottom: 0;

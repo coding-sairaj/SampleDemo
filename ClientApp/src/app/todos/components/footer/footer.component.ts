@@ -17,7 +17,7 @@ export class FooterComponent implements OnInit {
 
   constructor(private todoService: TodosService) {
     this.activeCount$ = this.todoService.todos$.pipe(
-      map((todos)=> todos.filter(todo => !todo.isCompleted).length)
+      map((todos)=> todos.filter(todo => !todo.isComplete).length)
     );
     this.itemsLeftText$ = this.activeCount$.pipe(
       map((activeCount)=> `item${activeCount!==1 ? 's' : ''} left`)
