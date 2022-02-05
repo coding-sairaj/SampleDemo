@@ -10,7 +10,7 @@ using SampleDemo.Extensions;
 namespace SampleDemo.Controllers;
 
 [ApiController]
-[Route("items")]
+[Route("[controller]")]
 public class TodoController : ControllerBase {
     private readonly ITodoTasksRepository repository;
 
@@ -20,21 +20,22 @@ public class TodoController : ControllerBase {
     }
 
     [HttpGet]
-    public IEnumerable<ToDoDto> GetTasks()
+    public async Task<IEnumerable<ToDoDto>> GetTasksAsync()
     {
-        var items = repository.GetTasks().Select(todo => todo.AsDto());
+        var items = (await repository.GetTasksAsync())
+                        .Select(todo => todo.AsDto());
         return items;
     }
     [HttpGet("{id}")]
-    public ActionResult<ToDoDto> GetTask(Guid id)
+    public async Task<ActionResult<ToDoDto>> GetTaskAsync(Guid id)
     {
-        var item = repository.GetTask(id);
+        var item = await repository.GetTaskAsync(id);
         if(item is null)
             return NotFound();
         return item.AsDto();
     }
     [HttpPost]
-    public ActionResult<ToDoDto> CreateTask(CreateTodoDto toDo)
+    public async Task<ActionResult<ToDoDto>> CreateTaskAsync(CreateTodoDto toDo)
     {
         ToDo task = new() {
             Id = Guid.NewGuid(),
@@ -42,14 +43,14 @@ public class TodoController : ControllerBase {
             CreatedDate = DateTime.Now
         };
 
-        repository.CreateTask(task);
+        await repository.CreateTaskAsync(task);
 
-        return CreatedAtAction(nameof(GetTask), new {id = task.Id}, task.AsDto());
+        return CreatedAtAction(nameof(GetTaskAsync), new {id = task.Id}, task.AsDto());
     }
     [HttpPut("{id}")]
-    public ActionResult UpdateTask(Guid id, UpdateToDoDto todo)
+    public async Task<ActionResult> UpdateTaskAsync(Guid id, UpdateToDoDto todo)
     {
-        var existingTask = repository.GetTask(id);
+        var existingTask = await repository.GetTaskAsync(id);
         if(existingTask is null)
             return NotFound();
         ToDo updatedTask = existingTask with {
@@ -58,16 +59,16 @@ public class TodoController : ControllerBase {
             CompletedDate = todo.IsComplete ? DateTime.Now : null
         };
 
-        repository.UpdateTask(updatedTask);
+        await repository.UpdateTaskAsync(updatedTask);
         return NoContent();
     }
     [HttpDelete("{id}")]
-    public ActionResult DeleteItem(Guid id)
+    public async Task<ActionResult> DeleteItemAsync(Guid id)
     {
-        var existingTask = repository.GetTask(id);
+        var existingTask = await repository.GetTaskAsync(id);
         if(existingTask is null)
             return NotFound();
-        repository.DeleteTask(id);
+        await repository.DeleteTaskAsync(id);
         return NoContent();
     }
 }

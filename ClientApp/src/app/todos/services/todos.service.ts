@@ -1,15 +1,33 @@
-import { Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { Inject, Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { FilterEnum } from "src/app/todos/types/filter.enum";
 import { TodoInterface } from "src/app/todos/types/todo.interface";
 
+const httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type':  'application/json',
+      Authorization: 'my-auth-token'
+    })
+  };
 @Injectable()
 export class TodosService
 {
+    private readonly _http: HttpClient;
+    private readonly _baseUrl:string;
+    constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+        this._http = http;
+        this._baseUrl = baseUrl + 'weatherforecast';
+      }
     todos$ = new BehaviorSubject<TodoInterface[]>([]);
     filter$ = new BehaviorSubject<FilterEnum>(FilterEnum.all);
 
+    
+
     addTodo(text: string): void {
+        this._http.post<string>(this._baseUrl,text).subscribe(result => {
+            
+          });
         const newTodo: TodoInterface = {
             text,
             isCompleted: false,

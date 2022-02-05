@@ -14,30 +14,34 @@ public class TodoTasksRepository : ITodoTasksRepository
         new ToDo { Id = Guid.NewGuid(), Task = "Task 3", IsComplete = false, CreatedDate = DateTime.Now }
     };
 
-    public IEnumerable<ToDo> GetTasks()
+    public async Task<IEnumerable<ToDo>> GetTasksAsync()
     {
-        return tasks;
+        return await Task.FromResult(tasks);
     }
 
-    public ToDo GetTask(Guid id)
+    public async Task<ToDo> GetTaskAsync(Guid id)
     {
-        return tasks.Where(task => task.Id == id).SingleOrDefault();
+        var task = tasks.Where(task => task.Id == id).SingleOrDefault();
+        return await Task.FromResult(task);
     }
 
-    public void CreateTask(ToDo todo)
+    public async Task CreateTaskAsync(ToDo todo)
     {
         tasks.Add(todo);
+        await Task.CompletedTask;
     }
 
-    public void UpdateTask(ToDo todo)
+    public async Task UpdateTaskAsync(ToDo todo)
     {
         var index = tasks.FindIndex(existingTask => existingTask.Id == todo.Id);
         tasks[index] = todo;
+        await Task.CompletedTask;
     }
 
-    public void DeleteTask(Guid id)
+    public async Task DeleteTaskAsync(Guid id)
     {
         var index = tasks.FindIndex(existingTask => existingTask.Id == id);
         tasks.RemoveAt(index);
+        await Task.CompletedTask;
     }
 }
